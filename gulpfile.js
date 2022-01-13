@@ -7,6 +7,7 @@ const sourcemaps = require('gulp-sourcemaps');
 const postcss = require('gulp-postcss');
 const cssnano = require('cssnano');
 const autoprefixer = require('autoprefixer');
+const replace = require('gulp-replace');
 const { src, series, parallel, dest, watch } = require('gulp');
 
 const jsPath = 'js/*.js';
@@ -79,24 +80,53 @@ function jsTask() {
 function cssTask() {
   return src(cssPath)
     .pipe(sourcemaps.init())
-    .pipe(concat('style.css'))
+    .pipe(concat('styles.css'))
     .pipe(postcss([autoprefixer(), cssnano()])) //not all plugins work with postcss only the ones mentioned in their documentation
     .pipe(sourcemaps.write('.'))
     .pipe(dest('dist/css'));
 }
 
+// function replaceHtmlText() {
+//   gulp.src('./index.html')
+//       .pipe(replace({
+//           patterns: [
+//               {
+//                   match: 'I am Sakeena,',
+//                   replacement: 'I am Saleem, '
+//               }
+//           ]
+//       }))
+//       .pipe(gulp.dest('./'))
+// }
+
+
+function replaceHtmlText() {
+  return src(['dist/index.html'])
+    // .pipe(replace('I am Sakeena,', 'I am Sakeena, '))
+    // .pipe(replace('a digital media', 'a digital media '))
+    // .pipe(replace('& design student', '& design student '))
+    .pipe(replace('<h1 class="text-huge-title">I am Sakeena,<br>a digital media<br>& design student<br>in Chicago.<br></h1>', '<h1 class="text-huge-title">I am Sakeena, <br>a digital media <br>& design student <br>in Chicago.<br></h1>'))    
+    .pipe(dest('dist/'));
+};
+
+
 // function watchTask() {
 //   watch([cssPath, jsPath], { interval: 1000 }, parallel(cssTask, jsTask));
 // }
 
+
+// exports.copyHtml = copyHtml;
 exports.manifestFile = manifestFile;
 exports.minifyHTML = minifyHTML;
 exports.cssTask = cssTask;
 exports.jsTask = jsTask;
 exports.imgTask = imgTask;
 exports.imgTaskFavIcons = imgTaskFavIcons;
-
+exports.replaceHtmlText = replaceHtmlText;
 exports.default = series(
-  parallel(manifestFile, minifyHTML, cssTask, jsTask, imgTask, imgTaskFavIcons)
-  //   ,watchTask
+  // parallel(manifestFile, cssTask, jsTask, imgTask, imgTaskFavIcons),watchTask
+  parallel(minifyHTML, manifestFile, cssTask, jsTask, imgTask, imgTaskFavIcons, replaceHtmlText)
+  // parallel(copyHtml, manifestFile, cssTask, jsTask, imgTask, imgTaskFavIcons)
 );
+
+
